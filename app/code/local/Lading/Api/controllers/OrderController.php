@@ -6,16 +6,25 @@
  * date 2015-05-11
  */
 class Lading_Api_OrderController extends Mage_Core_Controller_Front_Action {
-	/**
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
+    /**
 	 * get Orders
 	 */
 	public function getOrderAction() {
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			$order_id = $this->getRequest ()->getParam ( 'order_id' );
 			$order_info = Mage::getModel('mobile/order')->getOrderById($order_id);
-			echo json_encode(array('code'=>0,'msg'=>null,'model'=>$order_info));
+			Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>null,'result'=>$order_info));
 		}else{
-			echo json_encode(array('code'=>5,'msg'=>'no user login','model'=>null));
+			Mage::helper('mobileapi')->json(array('error'=>5,'msg'=>'no user login','result'=>null));
 		}
 		
 	}
@@ -63,10 +72,10 @@ class Lading_Api_OrderController extends Mage_Core_Controller_Front_Action {
 				);
 			}
 
-			echo json_encode(array('code'=>0,'msg'=>null,'model'=>$order_list));
+			Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>null,'result'=>$order_list));
 
 		}else{
-			echo json_encode(array('code'=>5,'msg'=>'no user login','model'=>null));
+			Mage::helper('mobileapi')->json(array('error'=>5,'msg'=>'no user login','result'=>null));
 		}
 	}
 
@@ -177,13 +186,13 @@ class Lading_Api_OrderController extends Mage_Core_Controller_Front_Action {
 //			    $checkout->saveOrder();
 //			    $cart->truncate();
 //			    $cart->save();
-//			    echo json_encode(array('code'=>0,'msg'=>'create order success!!','model'=>null));
+//			    Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>'create order success!!','result'=>null));
 //			} catch (Exception $ex) {
-//				echo json_encode(array('code'=>0,'msg'=>$ex->getMessage(),'model'=>null));
+//				Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>$ex->getMessage(),'result'=>null));
 //			}
 //
 //		} else {
-//			echo json_encode(array('code'=>1,'msg'=>'no user login in','model'=>null));
+//			Mage::helper('mobileapi')->json(array('error'=>1,'msg'=>'no user login in','result'=>null));
 //			return false;
 //		}
 //	}

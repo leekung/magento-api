@@ -48,11 +48,11 @@
                 <class>Lading_Api_Model</class>
             </mobile>
         </models>
-        <!--<helpers>-->
-            <!--<mobileapi>-->
-                <!--<class>Lading_Api_Helper</class>-->
-            <!--</mobileapi>-->
-        <!--</helpers>-->
+        <helpers>
+            <mobileapi>
+                <class>Lading_Api_Helper</class>
+            </mobileapi>
+        </helpers>
     </global>
 </config>
 

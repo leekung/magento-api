@@ -4,18 +4,36 @@
  * Class Lading_Api_IndexController
  */
 class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
-	public function indexAction() {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
+    public function indexAction() {
 		Mage::app ()->cleanCache ();
 		$cmd = ($this->getRequest ()->getParam ( 'cmd' )) ? ($this->getRequest ()->getParam ( 'cmd' )) : 'daily_sale';
 		switch ($cmd) {
 			case 'menu' : // OK
 				// ---------------------------------列出产品目录-BEGIN-------------------------------------//
+                // temporary menu
+                // TODO - query for real menu
+                $menu_tmp = file_get_contents(dirname(__FILE__) . '/shop-menu.txt');
+                $menu_result = json_decode($menu_tmp, true);
+
+                Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>'' ,'result'=>$menu_result));
+                // temporary menu
+
+                $time1 = microtime(true);
 				$_helper = Mage::helper ( 'catalog/category' );
 				$_categories = $_helper->getStoreCategories ();
 				$_categorylist = array ();
 				if (count ( $_categories ) > 0) {
 					foreach ( $_categories as $_category ) {
-						if(Mage::getModel('mobile/menu')->_hasProducts($_category->getId())) {
+                        if(Mage::getModel('mobile/menu')->_hasProducts($_category->getId())) {
 							$_helper->getCategoryUrl($_category);
 							$childMenu = Mage::getModel('catalog/category')->load($_category->getId())->getAllChildren();
 							$childMenu = explode(',', $childMenu);
@@ -43,9 +61,12 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 						}
 					}
 				}
-				echo json_encode (array('code'=>0, 'msg'=>null ,'model'=>$_categorylist));
+                $time2 = microtime(true);
+                $time3 = $time2 - $time1;
+				Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>$time3 ,'result'=>$_categorylist));
 				// ---------------------------------列出产品目录 END----------------------------------------//
-				break;
+
+                break;
 
 			case 'catalog' :
 //				Mage::app()->getStore()->setCurrentCurrencyCode('CNY');
@@ -65,7 +86,7 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 				}else{
 					$product_list = array();
 				}
-				echo json_encode ( array('code'=>0, 'msg'=>'get '.count($product_list).' product success!', 'model'=>$product_list) );
+				Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>'get '.count($product_list).' product success!', 'result'=>$product_list) );
 				// ------------------------------取某个分类下的产品-END-----------------------------------//
 				break;
 			case 'coming_soon' : // 数据ok
@@ -104,7 +125,7 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 					$products = $_productCollection->getItems ();
 					$productlist = $this->getProductList ( $products );
 				}
-				echo json_encode ( array('code'=>0, 'msg'=>null, 'model'=>$productlist) );
+				Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$productlist) );
 				// ------------------------------首页 促销商品 END-------------------------------------//
 				break;
 			case 'best_seller' : // OK
@@ -165,7 +186,7 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 				}else{
 					$product_list = array();
 				}
-				echo json_encode ( array('code'=>0, 'msg'=>null, 'model'=>$product_list) );
+				Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$product_list) );
 				// ------------------------------首页 预特价商品 END--------------------------------//
 				break;
 			case 'daily_sale' : // 数据OK
@@ -200,7 +221,7 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 					$products = $collection->getItems ();
 					$productlist = $this->getProductList ( $products );
 				}
-				echo json_encode ( array('code'=>0, 'msg'=>null, 'model'=>$productlist) );
+				Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$productlist) );
 				// echo $count;
 
 				// -------------------------------首页 特卖商品 END------------------------------//
@@ -222,13 +243,13 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 					$products = $collection->getItems ();
 					$productlist = $this->getProductList ( $products );
 				}
-				echo json_encode ( array('code'=>0, 'msg'=>null, 'model'=>$productlist) );
+				Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$productlist) );
 				// echo $count;
 				// -------------------------------首页 特卖商品 END------------------------------//
 				break;
 			default :
 				// echo 'Your request was wrong.';
-			echo json_encode(array('code'=>1, 'msg'=>'Your request was wrong.', 'model'=>array()));
+			Mage::helper('mobileapi')->json(array('error'=>1, 'msg'=>'Your request was wrong.', 'result'=>array()));
 				// echo $currency_code = Mage::app()->getStore()->getCurrentCurrencyCode();
 				// echo Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
 				break;

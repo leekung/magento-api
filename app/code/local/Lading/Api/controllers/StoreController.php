@@ -1,5 +1,14 @@
 <?php
 class Lading_Api_StoreController extends Mage_Core_Controller_Front_Action {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
     /**
      * get website info
      */
@@ -23,10 +32,10 @@ class Lading_Api_StoreController extends Mage_Core_Controller_Front_Action {
 				}
 			}
 		}
-		echo json_encode(array('code'=>0,'msg'=>'get websiteInfo success.', 'model'=>$basicinfo));
+		Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>'get websiteInfo success.', 'result'=>$basicinfo));
 		// public function getStoresStructure($isAll = false, $storeIds = array(), $groupIds = array(), $websiteIds = array())
-		// echo json_encode ( Mage::getSingleton ( 'adminhtml/system_store' )->getStoresStructure (TRUE) );
-		// echo json_encode(Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true));
+		// Mage::helper('mobileapi')->json ( Mage::getSingleton ( 'adminhtml/system_store' )->getStoresStructure (TRUE) );
+		// Mage::helper('mobileapi')->json(Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true));
 	}
 
 
@@ -34,7 +43,7 @@ class Lading_Api_StoreController extends Mage_Core_Controller_Front_Action {
      * get store info
      */
     public function storeInfoAction(){
-        echo json_encode(array('store_id'=>Mage::app()->getStore()->getStoreId(),
+        Mage::helper('mobileapi')->json(array('store_id'=>Mage::app()->getStore()->getStoreId(),
             'store_code'=>Mage::app()->getStore()->getCode(),
             'website_id'=>Mage::app()->getStore()->getWebsiteId(),
             'name'=>Mage::app()->getStore()->getName(),

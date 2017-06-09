@@ -1,0 +1,283 @@
+[{
+    "category_id": "8",
+    "name": "ดูแลผิวหน้า",
+    "child": [{
+            "category_id": "15",
+            "name": "ปัญหาผิว",
+            "child": [{
+                    "category_id": 30,
+                    "name": "ผิวมีริ้วรอย",
+                    "child": []
+                },
+                {
+                    "category_id": 31,
+                    "name": "ผิวไม่กระจ่างใส",
+                    "child": []
+                },
+                {
+                    "category_id": 33,
+                    "name": "ผิวหมองคล้ำ",
+                    "child": []
+                },
+                {
+                    "category_id": 34,
+                    "name": "ผิวมัน รูขุมขนกว้าง",
+                    "child": []
+                },
+                {
+                    "category_id": 35,
+                    "name": "ผิวแห้งขาดความชุ่มชื่น",
+                    "child": []
+                },
+                {
+                    "category_id": 36,
+                    "name": "ผิวเป็นสิว",
+                    "child": []
+                }
+            ]
+        }, {
+            "category_id": "16",
+            "name": "ประเภทสินค้า",
+            "child": [{
+                    "category_id": 124,
+                    "name": "สกินแคร์เซต",
+                    "child": []
+                },
+                {
+                    "category_id": 195,
+                    "name": "อุปกรณ์ทำความสะอาดผิวหน้า",
+                    "child": []
+                },
+                {
+                    "category_id": 37,
+                    "name": "ริมฝีปาก",
+                    "child": []
+                },
+                {
+                    "category_id": 38,
+                    "name": "เจล โฟม ล้างทำความสะอาดผิว",
+                    "child": []
+                },
+                {
+                    "category_id": 39,
+                    "name": "โทนเนอร์",
+                    "child": []
+                },
+                {
+                    "category_id": 40,
+                    "name": "สปอท ทรีทเม้นท์",
+                    "child": []
+                },
+                {
+                    "category_id": 41,
+                    "name": "ดูแลผิวรอบดวงตา",
+                    "child": []
+                },
+                {
+                    "category_id": 42,
+                    "name": "ซีรั่ม",
+                    "child": []
+                },
+                {
+                    "category_id": 43,
+                    "name": "มอยซ์เจอร์ไรเซอร์",
+                    "child": []
+                },
+                {
+                    "category_id": 44,
+                    "name": "แผ่นมาส์ค",
+                    "child": []
+                },
+                {
+                    "category_id": 45,
+                    "name": "ครีมกันแดด",
+                    "child": []
+                },
+                {
+                    "category_id": 46,
+                    "name": "สครับ มาส์ค",
+                    "child": []
+                },
+                {
+                    "category_id": 180,
+                    "name": "ดูแลผิวตามช่วงอายุ",
+                    "child": []
+                }
+            ]
+        }, {
+            "category_id": "137",
+            "name": "ประเภทซีรี่ย์",
+            "child": [{
+                    "category_id": 138,
+                    "name": "RED Natural Whitening Phenomenon",
+                    "child": []
+                },
+                {
+                    "category_id": 139,
+                    "name": "Beauty Essence Complex",
+                    "child": []
+                },
+                {
+                    "category_id": 140,
+                    "name": "Natural Power C Miracle Brightening Complex",
+                    "child": []
+                },
+                {
+                    "category_id": 141,
+                    "name": "Lumino Complex Expert White",
+                    "child": []
+                },
+                {
+                    "category_id": 142,
+                    "name": "Ultimate Renewal",
+                    "child": []
+                },
+                {
+                    "category_id": 143,
+                    "name": "Skin Solution Complex Anti Acne",
+                    "child": []
+                },
+                {
+                    "category_id": 144,
+                    "name": "Skin Solution Complex Whitening",
+                    "child": []
+                },
+                {
+                    "category_id": 145,
+                    "name": "Absolute Treatment",
+                    "child": []
+                },
+                {
+                    "category_id": 146,
+                    "name": "Weekly Detox",
+                    "child": []
+                },
+                {
+                    "category_id": 147,
+                    "name": "Juice Fruity Lip Care",
+                    "child": []
+                },
+                {
+                    "category_id": 148,
+                    "name": "Botanical Lip Expert",
+                    "child": []
+                },
+                {
+                    "category_id": 190,
+                    "name": "Happy Beauty Mask",
+                    "child": []
+                },
+                {
+                    "category_id": 196,
+                    "name": "Accessories",
+                    "child": []
+                }
+            ]
+        }, {
+            "category_id": "180",
+            "name": "ดูแลผิวตามช่วงอายุ",
+            "child": [{
+                    "category_id": 181,
+                    "name": "อายุ 20+",
+                    "child": []
+                },
+                {
+                    "category_id": 182,
+                    "name": "อายุ 30+",
+                    "child": []
+                },
+                {
+                    "category_id": 183,
+                    "name": "อายุ 40+",
+                    "child": []
+                }
+            ]
+        }
+
+    ]
+}, {
+    "category_id": "14",
+    "name": "เมคอัพ",
+    "child": [
+    {
+        "category_id": 17,
+        "name": "ปัญหาผิว",
+        "child": [
+    {
+        "category_id": 19,
+        "name": "ดวงตา",
+        "child": []
+    },
+    {
+        "category_id": 20,
+        "name": "ริมฝีปาก",
+        "child": []
+    },
+    {
+        "category_id": 47,
+        "name": "ผิวมีริ้วรอย",
+        "child": []
+    },
+    {
+        "category_id": 48,
+        "name": "ผิวไม่กระจ่างใส",
+        "child": []
+    },
+    {
+        "category_id": 49,
+        "name": "ผิวมัน",
+        "child": []
+    },
+    {
+        "category_id": 50,
+        "name": "สีผิวไม่สม่ำเสมอ",
+        "child": []
+    },
+    {
+        "category_id": 51,
+        "name": "มีรอยดำของสิว",
+        "child": []
+    },
+    {
+        "category_id": 52,
+        "name": "รูขุมขนกว้าง",
+        "child": []
+    },
+    {
+        "category_id": 53,
+        "name": "ปากแห้ง",
+        "child": []
+    },
+    {
+        "category_id": 57,
+        "name": "ปากคล้ำ",
+        "child": []
+    },
+    {
+        "category_id": 58,
+        "name": "ปากมีริ้วรอย",
+        "child": []
+    },
+    {
+        "category_id": 59,
+        "name": "ปากไม่ได้รูป",
+        "child": []
+    }]
+    }]
+}, {
+    "category_id": "10",
+    "name": "ดูแลผิวกาย",
+    "child": []
+}, {
+    "category_id": "12",
+    "name": "ดูแลเส้นผม",
+    "child": []
+}, {
+    "category_id": "13",
+    "name": "ความหอม",
+    "child": []
+}, {
+    "category_id": "149",
+    "name": "ผลิตภัณฑ์กันแดด",
+    "child": []
+}]

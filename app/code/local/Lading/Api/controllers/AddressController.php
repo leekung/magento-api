@@ -12,30 +12,38 @@
  */
 class Lading_Api_AddressController extends Mage_Core_Controller_Front_Action
 {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
 
     /**
      * 获取用户地址列表
      */
     public function getAddressListAction(){
         $result = array (
-            'code' => 0,
+            'error' => 0,
             'msg' => null,
-            'model' => null
+            'result' => null
         );
         $session = Mage::getSingleton('customer/session');
         if (!$session->isLoggedIn()) {
-            $result['code'] = 5;
+            $result['error'] = 1;
             $result['msg'] = 'user is not login';
-            echo json_encode($result);
+            Mage::helper('mobileapi')->json($result);
             return;
         }
         $customer = Mage::getSingleton('customer/session')->getCustomer();
         $addressList = Mage::getModel('mobile/address')->getCustomerAddressList($customer);
-        echo json_encode(
+        Mage::helper('mobileapi')->json(
             array(
-                'code' => 0,
+                'error' => 0,
                 'msg' => 'get user address list success!',
-                'model' => $addressList
+                'result' => $addressList
             )
         );
     }
@@ -47,24 +55,24 @@ class Lading_Api_AddressController extends Mage_Core_Controller_Front_Action
      */
     public function getAddressAction(){
         $result = array (
-            'code' => 0,
+            'error' => 0,
             'msg' => null,
-            'model' => null
+            'result' => null
         );
         $session = Mage::getSingleton('customer/session');
         if (!$session->isLoggedIn()) {
-            $result['code'] = 5;
+            $result['error'] = 1;
             $result['msg'] = 'user is not login';
-            echo json_encode($result);
+            Mage::helper('mobileapi')->json($result);
             return;
         }
         $addressId = $this->getRequest()->getParam( 'address_id' );
         $return_address = Mage::getModel('mobile/address')->getAddressById($addressId);
-        echo json_encode(
+        Mage::helper('mobileapi')->json(
             array(
-                'code' => 0,
+                'error' => 0,
                 'msg' => 'get user address success!',
-                'model' => $return_address
+                'result' => $return_address
             )
         );
     }
@@ -79,23 +87,23 @@ class Lading_Api_AddressController extends Mage_Core_Controller_Front_Action
     public function deleteAction(){
         $addressId = $this->getRequest()->getParam ( 'address_id' );
         $result = array (
-            'code' => 0,
+            'error' => 0,
             'msg' => null,
-            'model' => true
+            'result' => true
         );
         $address = Mage::getModel('customer/address')
             ->load($addressId);
         if (!$address->getId()) {
             $result['msg'] = 'not_exists';
-            $result['model'] = false;
+            $result['result'] = false;
         }
         try {
             $address->delete();
         } catch (Mage_Core_Exception $e) {
             $result['msg'] = $e->getMessage();
-            $result['model'] = false;
+            $result['result'] = false;
         }
-        echo json_encode($result);
+        Mage::helper('mobileapi')->json($result);
     }
 
     /**
@@ -105,14 +113,14 @@ class Lading_Api_AddressController extends Mage_Core_Controller_Front_Action
     public function createAction(){
         $session = Mage::getSingleton('customer/session');
         $result = array (
-            'code' => 0,
+            'error' => 0,
             'msg' => null,
-            'model' => null
+            'result' => null
         );
         if (!$session->isLoggedIn()) {
-            $result['code'] = 5;
+            $result['error'] = 1;
             $result['msg'] = 'user is not login';
-            echo json_encode($result);
+            Mage::helper('mobileapi')->json($result);
             return;
         }
         $addressData = array();
@@ -174,36 +182,36 @@ class Lading_Api_AddressController extends Mage_Core_Controller_Front_Action
                 $addressValidation = count($errors) == 0;
                 if (true === $addressValidation) {
                     $address->save();
-                    $result['code'] = 0;
+                    $result['error'] = 0;
                     $result['msg'] = 'save or update user address success!';
-                    echo json_encode($result);
+                    Mage::helper('mobileapi')->json($result);
                     return;
                 } else {
                     if (is_array($errors)) {
-                        $result['code'] = 3;
+                        $result['error'] = 1;
                         $result['msg'] = $errors;
                     } else {
-                        $result['code'] = 3;
+                        $result['error'] = 1;
                         $result['msg'] = 'Can\'t save or update address';
                     }
-                    echo json_encode($result);
+                    Mage::helper('mobileapi')->json($result);
                     return;
                 }
             } catch (Mage_Core_Exception $e) {
-                $result['code'] = 4;
+                $result['error'] = 1;
                 $result['msg'] = $e->getMessage();
-                echo json_encode($result);
+                Mage::helper('mobileapi')->json($result);
                 return;
             } catch (Exception $e) {
-                $result['code'] = 5;
+                $result['error'] = 1;
                 $result['msg'] = $e->getMessage();
-                echo json_encode($result);
+                Mage::helper('mobileapi')->json($result);
                 return;
             }
         } else {
-            $result['code'] = 6;
+            $result['error'] = 1;
             $result['msg'] = 'address data is null!';
-            echo json_encode($result);
+            Mage::helper('mobileapi')->json($result);
             return;
         }
     }

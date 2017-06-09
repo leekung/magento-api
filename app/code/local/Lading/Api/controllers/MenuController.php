@@ -4,6 +4,14 @@
  * Class Lading_Api_MenuController
  */
 class Lading_Api_MenuController extends Mage_Core_Controller_Front_Action {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
 
     /**
      * TODO:add method comment

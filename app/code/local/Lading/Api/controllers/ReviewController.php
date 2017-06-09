@@ -10,6 +10,14 @@
  * Class Lading_Api_ReviewController
  */
 class Lading_Api_ReviewController extends Mage_Core_Controller_Front_Action{
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
 
 
 
@@ -20,8 +28,8 @@ class Lading_Api_ReviewController extends Mage_Core_Controller_Front_Action{
     public function postAction(){
         $product_id = $this->getRequest ()->getParam ('product_id');
         $return_result = array(
-            'code'=> 0,
-            'model'=> null,
+            'error'=> 0,
+            'result'=> null,
         );
         if ($data = Mage::getSingleton('review/session')->getFormData(true)) {
             $rating = array();
@@ -59,7 +67,7 @@ class Lading_Api_ReviewController extends Mage_Core_Controller_Front_Action{
                     $return_result['msg'] = 'Your review has been accepted for moderation.';
                 }
                 catch (Exception $e) {
-                    $return_result['code'] = 1;
+                    $return_result['error'] = 1;
                     $return_result['error'] = 'Unable to post the review.';
                 }
             }
@@ -75,7 +83,7 @@ class Lading_Api_ReviewController extends Mage_Core_Controller_Front_Action{
                 }
             }
         }
-        echo json_encode($return_result);
+        Mage::helper('mobileapi')->json($return_result);
     }
 
 
@@ -115,7 +123,7 @@ class Lading_Api_ReviewController extends Mage_Core_Controller_Front_Action{
         $result = array();
         $result['total_results'] = $collection->getSize();
         $result['trade_rates'] = $tradeRates;
-        echo json_encode(array('code'=>0,'msg'=>'get reviews success!', 'model'=>$result));
+        Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>'get reviews success!', 'result'=>$result));
     }
 
 }

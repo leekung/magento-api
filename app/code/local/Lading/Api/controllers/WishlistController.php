@@ -1,47 +1,55 @@
 <?php
 class Lading_Api_WishlistController extends Mage_Core_Controller_Front_Action {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
 
 	/**
      * add item to user wish list
      */
 	public function addAction() {
 		$return_result = array(
-			'code' => 0,
+			'error' => 0,
 			'msg' => null,
-			'model' => null
+			'result' => null
 		);
 		if (! Mage::getStoreConfigFlag('wishlist/general/active')) {
-			$return_result ['code'] = 1;
+			$return_result ['error'] = 1;
 			$return_result ['msg'] = 'Wishlist Has Been Disabled By Admin';
-			echo json_encode($return_result);
+			Mage::helper('mobileapi')->json($return_result);
 			return;
 		}
 		if (! Mage::getSingleton('customer/session')->isLoggedIn()) {
-			$return_result ['code'] = 5;
+			$return_result ['error'] = 1;
 			$return_result ['msg'] = 'Please Login First';
-			echo json_encode($return_result);
+			Mage::helper('mobileapi')->json($return_result);
 			return;
 		}
 		$customer_id = Mage::getSingleton('customer/session')->getId();
 		$customer = Mage::getModel('customer/customer');
 		$wishlist = Mage::getModel('wishlist/wishlist');
 		$product  = Mage::getModel('catalog/product');
-		$product_id  = $_GET['product_id'];
+        $product_id = $this->getRequest ()->getParam ('product_id');
 		$customer->load($customer_id);
 		$wishlist->loadByCustomer($customer_id);
 		if($customer_id && $product_id){
 			$res = $wishlist->addNewItem($product->load($product_id));
 			if($res){
-				$return_result['code'] = 0;
+				$return_result['error'] = 0;
 				$return_result['msg'] = "your product has been added in wishlist";
-				$return_result['model'] = $res;
+				$return_result['result'] = $res;
 			}
-			echo json_encode($return_result);
+			Mage::helper('mobileapi')->json($return_result);
 		}else{
-			$return_result['code'] = 1;
+			$return_result['error'] = 1;
 			$return_result['msg'] = 'can not get customer info or product id';
-			$return_result['model'] = null;
-			echo json_encode($return_result);
+			$return_result['result'] = null;
+			Mage::helper('mobileapi')->json($return_result);
 		}
 	}
 
@@ -52,18 +60,18 @@ class Lading_Api_WishlistController extends Mage_Core_Controller_Front_Action {
      */
 	public function getWishlistAction(){
 		if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code' => 0,
+					'error' => 0,
 					'msg' => 'get user wish list success!',
-					'model' => $this->_getWishlist()
+					'result' => $this->_getWishlist()
 				)
 			);
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array ()
+				'result'=>array ()
 			));
 		}
 	}
@@ -75,7 +83,7 @@ class Lading_Api_WishlistController extends Mage_Core_Controller_Front_Action {
 	 * delete wish list action
 	 */
 	public function delAction(){
-		$product_id  = $_GET['product_id'];
+        $product_id = $this->getRequest ()->getParam ('product_id');
 		if (Mage::getSingleton('customer/session')->isLoggedIn()) {
 			$customer_id =  Mage::getSingleton ( 'customer/session' )->getCustomer ()->getId();
 			$item_collection = Mage::getModel('wishlist/item')->getCollection()->addCustomerIdFilter($customer_id);
@@ -84,18 +92,18 @@ class Lading_Api_WishlistController extends Mage_Core_Controller_Front_Action {
 					$item->delete();
 				}
 			}
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code' => 0,
+					'error' => 0,
 					'msg' => 'delete wish list product '.$product_id.' success!',
-					'model' => $this->_getWishlist()
+					'result' => $this->_getWishlist()
 				)
 			);
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array ()
+				'result'=>array ()
 			));
 		}
 	}

@@ -1,5 +1,14 @@
 <?php
 class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
     /**
      * get website info
      */
@@ -50,10 +59,10 @@ class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
                 }
                 array_push($bannerList,$temp_banner);
             }
-            echo json_encode(array(
-                'code'=>0,
+            Mage::helper('mobileapi')->json(array(
+                'error'=>0,
                 'msg'=>'get banners success!',
-                'model'=>array(
+                'result'=>array(
                     'title'=> $model->getTitle(),
                     'content'=> $model->getContent(),
                     'width' => $model->getWidth(),
@@ -68,10 +77,10 @@ class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
                 )
             ));
         }else{
-            echo json_encode ( array (
-                'code'=>1,
+            Mage::helper('mobileapi')->json ( array (
+                'error'=>1,
                 'msg'=>'please send banner id!',
-                'model'=>array ()
+                'result'=>array ()
             ));
         }
     }
@@ -135,16 +144,16 @@ class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
                     array_push($banner_item_list,$temp_product);
                 }
             }
-            echo json_encode(array(
-                'code'=>0,
+            Mage::helper('mobileapi')->json(array(
+                'error'=>0,
                 'msg'=>'get item list success!',
-                'model'=> $banner_item_list
+                'result'=> $banner_item_list
             ));
         }else{
-            echo json_encode ( array (
-                'code'=>1,
+            Mage::helper('mobileapi')->json ( array (
+                'error'=>1,
                 'msg'=>'please send banner identifier!',
-                'model'=>array ()
+                'result'=>array ()
             ));
         }
     }
@@ -161,9 +170,9 @@ class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
         $currentCurrency = Mage::app ()->getStore ()->getCurrentCurrencyCode ();
         $store_id = Mage::app()->getStore()->getId();
         $return_result = array(
-            'code' => 0,
+            'error' => 0,
             'msg' => 'get products success!',
-            'model' => null
+            'result' => null
         );
         $banner_id  = Mage::app ()->getRequest ()->getParam('banner_id');
         $model  = Mage::getModel('easybanner/banneritem')->load($banner_id,'banner_item_id');
@@ -198,12 +207,12 @@ class Lading_Api_BannerController extends Mage_Core_Controller_Front_Action {
                 );
                 array_push($return_products,$temp_product);
             }
-            $return_result['model'] = $return_products;
+            $return_result['result'] = $return_products;
         }else{
-            $return_result['code'] = 1;
+            $return_result['error'] = 1;
             $return_result['msg'] = 'could not find this banner!';
         }
-        echo json_encode($return_result);
+        Mage::helper('mobileapi')->json($return_result);
     }
 
 }

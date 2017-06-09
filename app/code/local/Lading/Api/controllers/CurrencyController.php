@@ -33,6 +33,15 @@
  */
 class Lading_Api_CurrencyController extends Mage_Core_Controller_Front_Action
 {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
     /**
      * switch currency
      */
@@ -40,10 +49,10 @@ class Lading_Api_CurrencyController extends Mage_Core_Controller_Front_Action
         if ($curency = (string) $this->getRequest()->getParam('currency')) {
             Mage::app()->getStore()->setCurrentCurrencyCode($curency);
         }
-        echo json_encode(array(
-            'code'=>0,
+        Mage::helper('mobileapi')->json(array(
+            'error'=>0,
             'msg' => 'set current currency code success!',
-            'model'=>null
+            'result'=>null
         ));
     }
 
@@ -59,10 +68,10 @@ class Lading_Api_CurrencyController extends Mage_Core_Controller_Front_Action
             'currency_symbol' => $currency_symbol,
             'currency_name' => $currency_name
         );
-        echo json_encode(array(
-            'code'=>0,
+        Mage::helper('mobileapi')->json(array(
+            'error'=>0,
             'msg' => 'set current currency code success!',
-            'model'=>$result
+            'result'=>$result
         ));
     }
 }

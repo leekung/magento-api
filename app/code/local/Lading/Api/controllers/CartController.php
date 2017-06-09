@@ -3,15 +3,24 @@
  * Class Lading_Api_CartController
  */
 class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
-	///mobileapi/cart/add?product=421&qty=5&super_attribute[92]=21&super_attribute[180]=78
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
+    ///mobileapi/cart/add?product=421&qty=5&super_attribute[92]=21&super_attribute[180]=78
     /**
      * 添加商品到购物车
      */
 	public function addAction() {
 		$result = array (
-			'code' => 1,
+			'error' => 1,
 			'msg' => null,
-			'model' => null
+			'result' => null
 		);
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			try {
@@ -27,7 +36,7 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 				// $param=$this->getRequest ()->getParam ( 'param' );
 				// $qty = $this->getRequest ()->getParam ( 'qty' );
 				if ($product_id == '') {
-					$result['code'] = 1;
+					$result['error'] = 1;
 					$result['msg'] = 'Product Not Added The SKU you entered" .$product_id. "was not found.';
 				}
 				$request = Mage::app ()->getRequest ();
@@ -43,17 +52,17 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 				$cart->save ();
 				$items_qty = floor ( Mage::getModel ( 'checkout/cart' )->getQuote ()->getItemsQty () );
 				$result = array("code"=>0, "msg"=> null, "model"=>array("items_qty"=>$items_qty));
-				echo json_encode($result);
+				Mage::helper('mobileapi')->json($result);
 				return;
 			} catch ( Exception $e ) {
 				$result = array("code"=>1, "msg"=>$e->getMessage () , "model"=>null);
-				echo json_encode($result);
+				Mage::helper('mobileapi')->json($result);
 				return;
 			}
 		}else{
-			$result['code'] = 5;
+			$result['error'] = 1;
 			$result['msg'] = 'not user login';
-			echo json_encode($result);
+			Mage::helper('mobileapi')->json($result);
 		}
 	}
 
@@ -63,21 +72,21 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
     public function removeCartAction(){
     	$id = $this->getRequest ()->getParam ( 'cart_item_id' );
 		$return_result = array(
-			'code' => 0,
+			'error' => 0,
 			'msg'  => 'delete cart '.$id.' from carts success',
-			'model' => null
+			'result' => null
 		);
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			Mage::getSingleton('checkout/cart')->removeItem($id)->save();
 			Mage::getModel('checkout/cart')->save();
-			$return_result['model'] = array(
+			$return_result['result'] = array(
 				'items_qty' => $items_qty = floor (Mage::getModel('checkout/cart')->getQuote()->getItemsQty())
 			);
 		}else{
-			$return_result['code'] = 5;
+			$return_result['error'] = 1;
 			$return_result['msg'] = 'not user login';
 		}
-		echo json_encode($return_result);
+		Mage::helper('mobileapi')->json($return_result);
     }
 
 
@@ -87,10 +96,9 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 	 */
 	public function updateAction(){
 		$return_result = array(
-			'code' => 0,
+			'error' => 0,
 			'msg'  => 'update carts success',
-			'model' => null,
-			'error' => null
+			'result' => null,
 		);
 		try {
 			$cartData = $this->getRequest()->getParam('cart');
@@ -114,15 +122,15 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 			Mage::getSingleton('checkout/session')->setCartWasUpdated(true);
 
 		} catch (Mage_Core_Exception $e) {
-			$return_result['code'] = 1;
-			$return_result['error'] = $e->getMessage();
-			echo json_encode($return_result);
+			$return_result['error'] = 1;
+			$return_result['msg'] = $e->getMessage();
+			Mage::helper('mobileapi')->json($return_result);
 			return false;
 		} catch (Exception $e) {
-			$return_result['code'] = 1;
-			$return_result['error'] = 'Cannot update shopping cart.';
+			$return_result['error'] = 1;
+			$return_result['msg'] = 'Cannot update shopping cart.';
 			Mage::logException($e);
-			echo json_encode($return_result);
+			Mage::helper('mobileapi')->json($return_result);
 			return false;
 		}
 		return $this->getCartInfoAction ();
@@ -138,16 +146,16 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 	public function getCouponDetailAction() {
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			$result = array (
-				'code' => 0,
+				'error' => 0,
 				'msg' => 'get coupon detail success',
-				'model' => $this->_getCartTotal()
+				'result' => $this->_getCartTotal()
 			);
-			echo json_encode ($result);
+			Mage::helper('mobileapi')->json ($result);
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array ()
+				'result'=>array ()
 			));
 		}
 	}
@@ -160,16 +168,16 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 		$couponCode = ( string ) Mage::app ()->getRequest ()->getParam ( 'coupon_code' );
 		$cart = Mage::helper ( 'checkout/cart' )->getCart ();
 		if (! $cart->getItemsCount ()) {
-			echo json_encode ( array (
-				'code' => 1,
+			Mage::helper('mobileapi')->json ( array (
+				'error' => 1,
 				'msg' => "You can't use coupon code with an empty shopping cart"
 			) );
 			return;
 		}
 		$oldCouponCode = $cart->getQuote()->getCouponCode();
 		if (! strlen ( $couponCode ) && ! strlen ( $oldCouponCode )) {
-			echo json_encode ( array (
-				'code' => 2,
+			Mage::helper('mobileapi')->json ( array (
+				'error' => 1,
 				'msg' => "coupon code is Empty."
 			));
 			return;
@@ -182,35 +190,35 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 			if ($codeLength) {
 				if ($isCodeLengthValid && $couponCode == $cart->getQuote ()->getCouponCode ()) {
 					$messages = array (
-						'code' => 0,
+						'error' => 0,
 						'msg' => $this->__ ( 'Coupon code "%s" was applied.', Mage::helper ( 'core' )->escapeHtml ( $couponCode ) )
 					);
 				} else {
 					$messages = array (
-						'code' => 1,
+						'error' => 1,
 						'msg' => $this->__ ( 'Coupon code "%s" is not valid.', Mage::helper ( 'core' )->escapeHtml ( $couponCode ) )
 					);
 				}
 			} else {
 				$messages = array (
-					'code' => 0,
+					'error' => 0,
 					'msg' => $this->__ ( 'Coupon code was canceled.' )
 				);
 			}
 		} catch ( Mage_Core_Exception $e ) {
 			$messages = array (
-				'code' => 3,
+				'error' => 1,
 				'msg' => $e->getMessage ()
 			);
 		} catch ( Exception $e ) {
 			$messages = array (
-				'code' => 4,
+				'error' => 1,
 				'msg' => $this->__ ( 'Cannot apply the coupon code.' ),
                 'err' => $e
 			);
 		}
-		$messages['model'] = $this->_getCartTotal();
-		echo json_encode ($messages);
+		$messages['result'] = $this->_getCartTotal();
+		Mage::helper('mobileapi')->json ($messages);
 	}
 
 
@@ -233,12 +241,12 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 			$cartInfo ['payment_methods'] = $this->_getPaymentInfo ();
 			$cartInfo ['allow_guest_checkout'] = Mage::helper ( 'checkout' )->isAllowedGuestCheckout ( $cart->getQuote () );
 			$cartInfo ['symbol'] = Mage::app()->getLocale()->currency(Mage::app()->getStore()->getCurrentCurrencyCode())->getSymbol();
-			echo json_encode (array('code'=>0, 'msg'=>$message, 'model'=>$cartInfo));
+			Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>$message, 'result'=>$cartInfo));
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array () 
+				'result'=>array ()
 			));
 		}
 	}
@@ -422,20 +430,20 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 	public function getQtyAction() {
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			$items_qty = floor ( Mage::getModel ( 'checkout/cart' )->getQuote ()->getItemsQty () );
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
                 array(
-                    'code'=>0,
+                    'error'=>0,
                     'msg'=>null,
-                    'model'=>array(
+                    'result'=>array(
                         'num'=>$items_qty
                     )
                 )
             );
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array () 
+				'result'=>array ()
 			));
 		}
 	}
@@ -453,17 +461,17 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 			$cart = Mage::helper ( 'checkout/cart' )->getCart ();
 			$item_qty = $cart->getItemsQty ();
 			$summarycount = $cart->getSummaryCount ();
-			echo json_encode(array(
-				'code' => 0,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 0,
 				'url' => $url,
 				'item_qty' => $item_qty,
 				'summary_count' =>  $summarycount
 			));
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array ()
+				'result'=>array ()
 			));
 		}
 	}

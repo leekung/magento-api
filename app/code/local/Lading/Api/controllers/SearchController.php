@@ -4,6 +4,15 @@
  * Class Lading_Api_SearchController
  */
 class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
 
     /**
      * get current user session
@@ -17,7 +26,9 @@ class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
      * search
      */
 	public function indexAction() {
-		$page = ($this->getRequest ()->getParam ( 'page' )) ? ($this->getRequest ()->getParam ( 'page' )) : 1;
+        $product_list = array();
+
+        $page = ($this->getRequest ()->getParam ( 'page' )) ? ($this->getRequest ()->getParam ( 'page' )) : 1;
 		$limit = ($this->getRequest ()->getParam ( 'limit' )) ? ($this->getRequest ()->getParam ( 'limit' )) : 5;
 		$order = ($this->getRequest ()->getParam ( 'order' )) ? ($this->getRequest ()->getParam ( 'order' )) : 'relevance';
 		$dir = ($this->getRequest ()->getParam ( 'dir' )) ? ($this->getRequest ()->getParam ( 'dir' )) : 'desc';
@@ -62,7 +73,8 @@ class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
 					$product_list [] = array(
 						'entity_id' => $product->getId(),
 						'sku' => $product->getSku(),
-						'name' => $product->getName(),
+                        'name' => $product->getName(),
+                        'description' => $product->getDescription(),
 						'rating_summary' => $summaryData->getRatingSummary(),
 						'reviews_count' => $summaryData->getReviewsCount(),
 						'news_from_date' => $product->getNewsFromDate (),
@@ -82,11 +94,11 @@ class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
 			}else{
 				$product_list = array();
 			}
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code'=>0,
+					'error'=>0,
 					'msg'=>'search '.count($collection).' product success!',
-					'model'=> array(
+					'result'=> array(
 						'items'=> $product_list,
 					)
 				)
@@ -95,12 +107,11 @@ class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
 				$query->save();
 			}
 		} else {
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code'=>0,
-					'msg'=>null,
-					'model'=>null,
-					'error'=>'search keyword can not null!'
+					'error'=>0,
+					'msg'=>'search keyword can not null!',
+					'result'=>null
 				)
 			);
 		}
@@ -138,23 +149,22 @@ class Lading_Api_SearchController extends Mage_Core_Controller_Front_Action {
 				Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
 			)));
 			Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code'=>0,
+					'error'=>0,
 					'msg'=>'search '.count($collection).' product success!',
-					'model'=> count($collection)
+					'result'=> count($collection)
 				)
 			);
 			if(!Mage::helper('catalogsearch')->isMinQueryLength()){
 				$query->save();
 			}
 		} else {
-			echo json_encode(
+			Mage::helper('mobileapi')->json(
 				array(
-					'code'=>0,
-					'msg'=>null,
-					'model'=>null,
-					'error'=>'search keyword can not null!'
+					'error'=>0,
+					'msg'=>'search keyword can not null!',
+					'result'=>null
 				)
 			);
 		}

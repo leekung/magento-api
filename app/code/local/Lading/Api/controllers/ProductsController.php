@@ -4,7 +4,14 @@
  * Class Lading_Api_ProductsController
  */
 class Lading_Api_ProductsController extends Mage_Core_Controller_Front_Action {
-
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
 
     /**
      * 获取商品自定义属性
@@ -49,7 +56,7 @@ class Lading_Api_ProductsController extends Mage_Core_Controller_Front_Action {
             }
             $selectid ++;
         }
-        echo json_encode ( array('code'=>0, 'msg'=>null, 'model'=>$select) );
+        Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$select) );
     }
 
 
@@ -63,12 +70,13 @@ class Lading_Api_ProductsController extends Mage_Core_Controller_Front_Action {
         $currentCurrency = Mage::app ()->getStore ()->getCurrentCurrencyCode ();
         $product_id = $this->getRequest ()->getParam ( 'product_id' );
         $products_model = Mage::getModel('mobile/products');
-        $product = Mage::getModel ( "catalog/product" )->load ( $product_id );
+        $product = Mage::getModel ( "catalog/product" )->setStoreId(1)->load ( $product_id );
         $store_id = Mage::app()->getStore()->getId();
         $product_detail = array();
         $options = array();
         $price = array();
         $product_type = $product->getTypeId();
+
         switch($product_type){
             case Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE: {
                 $product_detail['attribute_options'] = $products_model->getProductOptions($product);
@@ -141,7 +149,7 @@ class Lading_Api_ProductsController extends Mage_Core_Controller_Front_Action {
         $product_detail['options'] = $options;
         $product_detail['mediaGallery'] = $mediaGallery;
 
-        echo json_encode(array('code'=>0, 'msg'=>null, 'model'=>$product_detail));
+        Mage::helper('mobileapi')->json(array('error'=>0, 'msg'=>null, 'result'=>$product_detail));
     }
 
 

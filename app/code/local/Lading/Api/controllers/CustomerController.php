@@ -15,6 +15,15 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 	const XML_PATH_CONFIRMED_EMAIL_TEMPLATE     = 'customer/create_account/email_confirmed_template';
 	const XML_PATH_GENERATE_HUMAN_FRIENDLY_ID   = 'customer/create_account/generate_human_friendly_id';
 
+    public function __construct(
+      \Zend_Controller_Request_Abstract $request,
+      \Zend_Controller_Response_Abstract $response,
+      array $invokeArgs = array()
+    ) {
+        parent::__construct($request, $response, $invokeArgs);
+        Mage::helper('mobileapi')->auth();
+    }
+
     /**
      * 获取用户登录状态
      */
@@ -27,9 +36,9 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 			if (isset($avatar))
 				$avatar = $storeUrl . "customer" . $customer->getMyAvatar ();
 			$customerinfo = array (
-				'code' => 0,
+				'error' => 0,
 				'msg' => null,
-				'model' => array(
+				'result' => array(
 					'entity_id' => $customer->getId(),
 					'name' => $customer->getName (),
 					'email' => $customer->getEmail (),
@@ -38,12 +47,12 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 					'session' => $session
 				)
 			);
-			echo json_encode ( $customerinfo );
+			Mage::helper('mobileapi')->json ( $customerinfo );
 		} else
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array () 
+				'result'=>array ()
 			));
 	}
 
@@ -66,26 +75,26 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 		} catch ( Mage_Core_Exception $e ) {
 			switch ($e->getCode ()) {
 				case Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED :
-					echo json_encode ( array (
-							'code' => 1,
+					Mage::helper('mobileapi')->json ( array (
+							'error' => 1,
 							'msg' => 'This account is not confirmed.',
-							'model'=>array () 
+							'result'=>array ()
 					) );
 					break;
 				case Mage_Customer_Model_Customer::EXCEPTION_INVALID_EMAIL_OR_PASSWORD :
 					$message = $e->getMessage ();
-					echo json_encode ( array (
-							'code' => 1,
+					Mage::helper('mobileapi')->json ( array (
+							'error' => 1,
 							'msg' => $message,
-							'model'=>array () 
+							'result'=>array ()
 					) );
 					break;
 				default :
 					$message = $e->getMessage ();
-					echo json_encode ( array (
-							'code' => 1,
+					Mage::helper('mobileapi')->json ( array (
+							'error' => 1,
 							'msg' => $message,
-							'model'=>array () 
+							'result'=>array ()
 					));
 			}
 		}
@@ -132,10 +141,10 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 					$address->save ();
 					$session->unsGuestAddress ();
 				}
-				echo json_encode ( array (
-						'code'=>0,
+				Mage::helper('mobileapi')->json ( array (
+						'error'=>0,
 						'msg'=>null,
-						'model'=>array (
+						'result'=>array (
 							'entity_id' => $customer->getId(),
 							'name' => $customer->getName (),
 							'email' => $customer->getEmail (),
@@ -145,10 +154,10 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 						)
 				) );
 			} else {
-				echo json_encode ( array (
-						'code'=>1,
+				Mage::helper('mobileapi')->json ( array (
+						'error'=>1,
 						'msg'=>$errors,
-						'model'=>array () 
+						'result'=>array ()
 				) );
 			}
 		} catch ( Mage_Core_Exception $e ) {
@@ -159,16 +168,16 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 			} else {
 				$message = $e->getMessage ();
 			}
-			echo json_encode ( array (
-					'code'=>1,
+			Mage::helper('mobileapi')->json ( array (
+					'error'=>1,
 					'msg'=>$message,
-					'model'=>array ()
+					'result'=>array ()
 			) );
 		} catch ( Exception $e ) {
-			echo json_encode ( array (
-					'code'=>1,
+			Mage::helper('mobileapi')->json ( array (
+					'error'=>1,
 					'msg'=>$e->getMessage (),
-					'model'=>array ()
+					'result'=>array ()
 					 
 			) );
 		}
@@ -189,16 +198,16 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 			$this->_sendEmailTemplate ( $customer,self::XML_PATH_FORGOT_EMAIL_TEMPLATE, self::XML_PATH_FORGOT_EMAIL_IDENTITY, array (
 					'customer' => $customer 
 			), null);
-			echo json_encode ( array (
-					'code' => 0,
+			Mage::helper('mobileapi')->json ( array (
+					'error' => 0,
 					'message' => 'Request has sent to your Email.',
-					'model'=>array()
+					'result'=>array()
 			) );
 		} else
-			echo json_encode ( array (
-					'code' => 1,
+			Mage::helper('mobileapi')->json ( array (
+					'error' => 1,
 					'message' => 'No matched email data.' ,
-					'model'=>array()
+					'result'=>array()
 			) );
 	}
 
@@ -208,9 +217,9 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 	public function logoutAction() {
 		try {
 			Mage::getSingleton ( 'customer/session' )->logout();
-			echo json_encode(array('code'=>0, 'msg'=>null, 'model'=>array()));
+			Mage::helper('mobileapi')->json(array('error'=>0, 'msg'=>null, 'result'=>array()));
 		} catch (Exception $e) {
-			echo json_encode(array('code'=>1, 'msg'=>$e->getMessage(), 'model'=>array()));
+			Mage::helper('mobileapi')->json(array('error'=>1, 'msg'=>$e->getMessage(), 'result'=>array()));
 		}
 	}
 
@@ -225,9 +234,9 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 		$customer = Mage::getModel ( 'customer/customer' )->setWebsiteId ( Mage::app ()->getStore ()->getWebsiteId () )->loadByEmail ( $email );
 		$info ['uname_is_exist'] = $customer->getId () > 0;
 		$result = array (
-				'code' => 0,
+				'error' => 0,
 				'message' => $info,
-				'model'=>array()
+				'result'=>array()
 		);
 		return $customer->getId () > 0;
 	}
@@ -284,22 +293,22 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 	            }
 	        }
 	        if (!empty($errors)) {
-	            echo json_encode(array('code'=>1, 'msg'=>$errors, 'model'=>array()));
+	            Mage::helper('mobileapi')->json(array('error'=>1, 'msg'=>$errors, 'result'=>array()));
 	            return ;
 	        }
 	        try {
 	        	$customer->save();
-	        	echo json_encode(array('code'=>0, 'msg'=>'success', 'model'=>$userData));
+	        	Mage::helper('mobileapi')->json(array('error'=>0, 'msg'=>'success', 'result'=>$userData));
 	        } catch (Mage_Core_Exception $e){
-	        	echo json_encode(array('code'=>1, 'msg'=>$e->getMessage(), 'model'=>array()));
+	        	Mage::helper('mobileapi')->json(array('error'=>1, 'msg'=>$e->getMessage(), 'result'=>array()));
 	        } catch (Exception $e){
-	        	echo json_encode(array('code'=>2, 'msg'=>$e->getMessage(), 'model'=>array()));
+	        	Mage::helper('mobileapi')->json(array('error'=>2, 'msg'=>$e->getMessage(), 'result'=>array()));
 	        }
 	    } else {
-	    	echo json_encode(array(
-				'code' => 5,
+	    	Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array () 
+				'result'=>array ()
 			));
 	    }
 	}
@@ -317,12 +326,12 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 				'firstname' => $customer->getFirstname(),
 				'lastname' => $customer->getLastname()
 			);
-			echo json_encode(array('code'=>0, 'msg'=>'get customer info success!', 'model'=>$userData));
+			Mage::helper('mobileapi')->json(array('error'=>0, 'msg'=>'get customer info success!', 'result'=>$userData));
 		}else{
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model'=>array ()
+				'result'=>array ()
 			));
 		}
 	}
@@ -351,20 +360,20 @@ class Lading_Api_CustomerController extends Mage_Core_Controller_Front_Action {
 				$customer->setPassword($new_password);
 				try {
 					$customer->save();
-					echo json_encode(array('code' => 0, 'msg' => 'success', 'model' => array()));
+					Mage::helper('mobileapi')->json(array('error' => 0, 'msg' => 'success', 'result' => array()));
 				} catch (Mage_Core_Exception $e) {
-					echo json_encode(array('code' => 1, 'msg' => $e->getMessage(), 'model' => array()));
+					Mage::helper('mobileapi')->json(array('error' => 1, 'msg' => $e->getMessage(), 'result' => array()));
 				} catch (Exception $e) {
-					echo json_encode(array('code' => 2, 'msg' => $e->getMessage(), 'model' => array()));
+					Mage::helper('mobileapi')->json(array('error' => 1, 'msg' => $e->getMessage(), 'result' => array()));
 				}
 			}else{
-				echo json_encode(array('code' => 2, 'msg' => 'password is not correct ', 'model' => array()));
+				Mage::helper('mobileapi')->json(array('error' => 1, 'msg' => 'password is not correct ', 'result' => array()));
 			}
 		}else {
-			echo json_encode(array(
-				'code' => 5,
+			Mage::helper('mobileapi')->json(array(
+				'error' => 1,
 				'msg' => 'not user login',
-				'model' => array()
+				'result' => array()
 			));
 		}
 	}
