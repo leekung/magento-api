@@ -59,8 +59,20 @@ class Lading_Api_ProductsController extends Mage_Core_Controller_Front_Action {
         Mage::helper('mobileapi')->json ( array('error'=>0, 'msg'=>null, 'result'=>$select) );
     }
 
+    public function barcodeAction() {
+        $barcode = $this->getRequest ()->getParam ('barcode');
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getModel('catalog/product')->getCollection();
+        $products = $collection->addAttributeToFilter('barcode', $barcode)
+          ->load()
+          ->toArray();
 
-
+        if (count($products) > 0) {
+            $product = reset($products);
+            Mage::app()->getRequest ()->setParam('product_id', $product['entity_id']);
+        }
+        $this->getProductDetailAction();
+    }
 
     /**
      * 获取商品详情
