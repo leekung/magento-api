@@ -19,51 +19,68 @@ class Lading_Api_IndexController extends Mage_Core_Controller_Front_Action {
 		switch ($cmd) {
 			case 'menu' : // OK
 				// ---------------------------------列出产品目录-BEGIN-------------------------------------//
-                // temporary menu
-                // TODO - query for real menu
-                $menu_tmp = file_get_contents(dirname(__FILE__) . '/shop-menu.txt');
-                $menu_result = json_decode($menu_tmp, true);
+                // TODO - cache result to improve speed
+                /** @var Mage_Catalog_Model_Category $categoriesArray */
+                $categoryModel = Mage::getModel('catalog/category');
+                /** @var Mage_Catalog_Model_Resource_Category_Collection $collection */
+                $collection = $categoryModel->getCollection();
 
-                Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>'' ,'result'=>$menu_result));
-                // temporary menu
+                $categoriesArray = $collection
+                  ->addAttributeToSelect('name')
+                  ->addAttributeToSort('position', 'asc')
+                  ->addAttributeToFilter('is_active', 1)
+                  ->load()
+                  ->toArray();
 
-                $time1 = microtime(true);
-				$_helper = Mage::helper ( 'catalog/category' );
-				$_categories = $_helper->getStoreCategories ();
-				$_categorylist = array ();
-				if (count ( $_categories ) > 0) {
-					foreach ( $_categories as $_category ) {
-                        if(Mage::getModel('mobile/menu')->_hasProducts($_category->getId())) {
-							$_helper->getCategoryUrl($_category);
-							$childMenu = Mage::getModel('catalog/category')->load($_category->getId())->getAllChildren();
-							$childMenu = explode(',', $childMenu);
-							array_shift($childMenu);
-							$child = array();
-							foreach ($childMenu as $childSec) {
-								//判断子级类目是否有商品
-								if (Mage::getModel('mobile/menu')->_hasProducts($childSec)) {
-									$child[$childSec] = Mage::getModel('catalog/category')->load($childSec)->getName();
-								}
-							}
-							$child = (object)$child;
-							$_categorylist [] = array(
-								'category_id' => $_category->getId(),
-								'name' => $_category->getName(),
-								'is_active' => $_category->getIsActive(),
-								'position ' => $_category->getPosition(),
-								'level ' => $_category->getLevel(),
-								'url_key' => Mage::getModel('catalog/category')->load($_category->getId())->getUrlPath(),
-								'thumbnail_url' => Mage::getModel('catalog/category')->load($_category->getId())->getThumbnailUrl(),
-								'image_url' => Mage::getModel('catalog/category')->load($_category->getId())->getImageUrl(),
-								// 'children' => Mage::getModel ( 'catalog/category' )->load ( $_category->getId () )->getAllChildren (),
-								'child' => $child
-							);
-						}
-					}
-				}
-                $time2 = microtime(true);
-                $time3 = $time2 - $time1;
-				Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>$time3 ,'result'=>$_categorylist));
+                $categories = array();
+                // Level 1
+                foreach ($categoriesArray as $categoryId => $category) {
+                    if (isset($category['name']) && isset($category['level'])
+                      && $category['level'] == 2) {
+                        $categories[$category['entity_id']] = array(
+                          'category_id'  => intval($category['entity_id']),
+                          'name'  => $category['name'],
+                          'child' => [],
+                        );
+                    }
+                }
+                $level2 = array();
+                // Level 2
+                foreach ($categoriesArray as $categoryId => $category) {
+                    if (isset($category['name']) && isset($category['level'])
+                      && $category['level'] == 3 && isset($category['parent_id']) && $category['parent_id'] > 0
+                      && isset($categories[$category['parent_id']])) {
+                        $categories[$category['parent_id']]['child'][$category['entity_id']] = array(
+                          'category_id'  => intval($category['entity_id']),
+                          'name'  => $category['name'],
+                          'child' => [],
+                        );
+                        $level2[$category['entity_id']] = array(
+                          'category_id' => $category['entity_id'],
+                          'parent_id' => $category['parent_id'],
+                        );
+                    }
+                }
+                // Level 3
+                foreach ($categoriesArray as $categoryId => $category) {
+                    if (isset($category['name']) && isset($category['level'])
+                      && $category['level'] == 4 && isset($category['parent_id']) && $category['parent_id'] > 0
+                      && isset($level2[$category['parent_id']])) {
+                        $categories[$level2[$category['parent_id']]['parent_id']]['child'][$level2[$category['parent_id']]['category_id']]['child'][] = array(
+                          'category_id'  => intval($category['entity_id']),
+                          'name'  => $category['name'],
+                          'child' => [],
+                        );
+                    }
+                }
+
+                // Final Process
+                $categories = array_values($categories);
+                foreach ($categories as $id => $category) {
+                    $categories[$id]['child'] = array_values($category['child']);
+                }
+
+				Mage::helper('mobileapi')->json (array('error'=>0, 'msg'=>'' ,'result'=>$categories));
 				// ---------------------------------列出产品目录 END----------------------------------------//
 
                 break;
