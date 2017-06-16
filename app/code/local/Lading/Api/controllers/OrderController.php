@@ -21,8 +21,13 @@ class Lading_Api_OrderController extends Mage_Core_Controller_Front_Action {
 	public function getOrderAction() {
 		if(Mage::getSingleton ( 'customer/session' )->isLoggedIn ()){
 			$order_id = $this->getRequest ()->getParam ( 'order_id' );
-			$order_info = Mage::getModel('mobile/order')->getOrderById($order_id);
-			Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>null,'result'=>$order_info));
+			$order_info = Mage::getModel('sales/order')->load($order_id);
+            if ($order_info) {
+                // TODO - format response
+                Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>null,'result'=>$order_info->getData()));
+            } else {
+                Mage::helper('mobileapi')->json(array('error'=>0,'msg'=>'not found order','result'=>array()));
+            }
 		}else{
 			Mage::helper('mobileapi')->json(array('error'=>5,'msg'=>'no user login','result'=>null));
 		}
