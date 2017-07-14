@@ -12,6 +12,8 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
         Mage::helper('mobileapi')->auth();
     }
 
+    public $errors = array();
+
     ///mobileapi/cart/add?product=421&qty=5&super_attribute[92]=21&super_attribute[180]=78
     /**
      * 添加商品到购物车
@@ -339,11 +341,14 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 	private function _getPaymentInfo() {
 		$cart = Mage::getSingleton ( 'checkout/cart' );
 		$methods = $cart->getAvailablePayment();
-		foreach ($methods as $method) {
-			if ($method->getCode() == 'paypal_express') {
-				return array('paypalec');
-			}
-		}
+		if (! empty($methods)) {
+            foreach ($methods as $method) {
+                if ($method->getCode() == 'paypal_express') {
+                    return array('paypalec');
+                }
+            }
+        }
+
 		return array();
 	}
 
@@ -360,6 +365,8 @@ class Lading_Api_CartController extends Mage_Core_Controller_Front_Action {
 		$displayCartPriceExclTax = Mage::helper ( 'tax' )->displayCartPriceExclTax ();
 		$displayCartBothPrices = Mage::helper ( 'tax' )->displayCartBothPrices ();
 		$items=$quote->getAllVisibleItems();
+		$exclPrice = 0;
+		$inclPrice = 0;
 		foreach ( $items as $item ) {
 			$cartItemArr = array ();
 			if($item->getProductType()=='bundle'){

@@ -136,7 +136,7 @@ class Lading_Api_CheckoutController extends Mage_Core_Controller_Front_Action{
                     $result['goto_section'] = 'shipping';
                 }
             }
-            if ($result['error']){
+            if (isset($result['error']) && !empty($result['error'])){
                 $return_result['error'] = 1;
                 $return_result['msg'] = 'set billing address fail! ' . $result['message'];
             }
@@ -189,7 +189,7 @@ class Lading_Api_CheckoutController extends Mage_Core_Controller_Front_Action{
             if (!$result) {
                 Mage::getSingleton('checkout/type_onepage')->getQuote()->collectTotals();
             }
-            if ($result['error']){
+            if (isset($result['error']) && !empty($result['error'])){
                 $return_result['msg'] = $result['message'];
             }
             $return_result['result'] = $result;
@@ -275,9 +275,9 @@ class Lading_Api_CheckoutController extends Mage_Core_Controller_Front_Action{
                     $inclPrice = $_incl - $item->getWeeeTaxDisposition();
                 }
             }
-            $exclPrice = Mage::helper('xmlconnect')->formatPriceForXml($exclPrice);
+            $exclPrice = Mage::helper('xmlConnect')->formatPriceForXml($exclPrice);
             $formatedExclPrice = $quote->getStore()->formatPrice($exclPrice, false);
-            $inclPrice = Mage::helper('xmlconnect')->formatPriceForXml($inclPrice);
+            $inclPrice = Mage::helper('xmlConnect')->formatPriceForXml($inclPrice);
             $formatedInclPrice = $quote->getStore()->formatPrice($inclPrice, false);
             if (Mage::helper('tax')->displayCartBothPrices()) {
                 $cartItemArr['price_excluding_tax'] = $exclPrice;

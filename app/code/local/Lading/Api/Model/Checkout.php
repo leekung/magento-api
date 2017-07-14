@@ -101,7 +101,7 @@ class Lading_Api_Model_Checkout extends Lading_Api_Model_Abstract {
                     'title'   => $paymentTitle,
                     'code' => $paymentCode
                 );
-                if($paymentCode == $quote_payment_code){
+                if(isset($quote_payment_code) && $paymentCode == $quote_payment_code){
                     $methods[$paymentCode]['is_selected'] = true;
                 }
             }
